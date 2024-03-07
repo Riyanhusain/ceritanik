@@ -1,0 +1,179 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+ enum Role {
+  ADMIN
+  CUSTOMER
+  SELLER
+}
+model Users {
+  id          Int   @id  @default(autoincrement())
+  email       String @unique
+  password    String
+  role        Role @default(ADMIN)
+  customer    Customers?  @relation(fields: [customerId], references: [id])
+  customerId  Int? @unique
+  employee    Employees?  @relation(fields: [employeeId], references: [id])
+  employeeId  Int? @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Customers  {
+  id            Int     @id @default(autoincrement())
+  firstName     String
+  lastName      String
+  address       String
+  phoneNumber   Int
+  dateOfBirth   DateTime
+  placeOfBrith  String
+  user          Users?
+  order_detail  Order_detail?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+model Employees  {
+  id            Int     @id @default(autoincrement())
+  firstName     String
+  lastName      String
+  address       String
+  phoneNumber   Int
+  dateOfBirth   DateTime
+  placeOfBrith  String
+  user          Users?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Products {
+  id            Int     @id @default(autoincrement())
+  name          String
+  description   String
+  sku           String
+  price         Decimal
+  discount      Discount @relation(fields: [discountId], references: [id])
+  discountId    Int @unique
+  inventory     Products_inventory @relation(fields: [inventoryId], references: [id])
+  inventoryId   Int @unique
+  category      Products_category @relation(fields: [categoryId], references: [id])
+  categoryId    Int @unique
+  image         Products_image[]
+  certification Products_certification[]
+  cart_item     Cart_item?
+  order_item    Order_items?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Discount {
+  id                Int     @id   @default(autoincrement())
+  name              String
+  description       String
+  discount_percent  Decimal
+  active            Boolean
+  product           Products[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+model Products_inventory {
+  id            Int     @id   @default(autoincrement())
+  quantity      Int
+  product       Products?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+model Products_category {
+  id            Int     @id   @default(autoincrement())
+  name          String
+  description   String
+  image         String
+  product       Products[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+model Products_image {
+  id            Int     @id   @default(autoincrement())
+  name          String
+  imageUrl      String
+  product       Products @relation(fields: [productId], references: [id])
+  productId     Int @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+model Certification {
+  id            Int     @id   @default(autoincrement())
+  name          String
+  description   String
+  certifications_number String
+  product Products_certification[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+model Products_certification{
+  id            Int     @id   @default(autoincrement())
+  product       Products @relation(fields: [productId], references: [id])
+  productId     Int @unique
+  certification Certification @relation(fields: [certificationId], references: [id])
+  certificationId Int @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+model Cart_item {
+  id            Int   @id   @default(autoincrement())
+  quantity      Int 
+  product       Products @relation(fields: [productId], references: [id])
+  productId     Int @unique
+  session       Shopping_session @relation(fields: [sessionId], references: [id])
+  sessionId     Int @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+model Shopping_session {
+  id            Int @id @default(autoincrement())
+  total         Int
+  cart_item     Cart_item[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+model Order_items{
+  id            Int   @id @default(autoincrement())
+  quantity      Int 
+  product       Products @relation(fields: [productId], references: [id])
+  productId     Int @unique
+  order_detail   Order_detail @relation(fields: [order_detailId], references: [id])
+  order_detailId Int @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+model Order_detail {
+  id            Int    @id @default(autoincrement())
+  total         Int
+  customer      Customers @relation(fields: [customerId], references: [id])
+  customerId    Int @unique
+  order_items   Order_items[]
+  payment       Payment_detail @relation(fields: [paymentId], references: [id])
+  paymentId     Int @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+model Payment_detail {
+  id            Int    @id @default(autoincrement())
+  amount        Int
+  provider      String
+  status        String
+  order_detail  Order_detail?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
