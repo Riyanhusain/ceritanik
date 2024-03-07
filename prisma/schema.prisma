@@ -38,7 +38,7 @@ model Customers  {
   address       String
   phoneNumber   Int
   dateOfBirth   DateTime
-  placeOfBrith  String
+  placeOfBirth  String
   user          Users?
   order_detail  Order_detail?
   createdAt     DateTime @default(now())
@@ -51,7 +51,7 @@ model Employees  {
   address       String
   phoneNumber   Int
   dateOfBirth   DateTime
-  placeOfBrith  String
+  placeOfBirth  String
   user          Users?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
