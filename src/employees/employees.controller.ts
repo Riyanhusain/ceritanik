@@ -8,33 +8,41 @@ import {
   Delete,
   Res,
   HttpStatus,
+  HttpCode,
+  UseFilters,
+  ParseIntPipe,
+  UseInterceptors,
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { Response } from 'express';
+import { Employees } from '@prisma/client';
+import { ValidationError } from 'class-validator';
+import { ValidationFilter } from 'src/validation/validation.filter';
+import { TimeInterceptor } from 'src/time/time.interceptor';
 
 @Controller('employees')
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
   @Post()
+  @UseInterceptors(TimeInterceptor)
   public async createEmployee(
     @Body() createEmployeeDto: CreateEmployeeDto,
     @Res() response: Response,
   ) {
     const employee =
       await this.employeesService.createEmployee(createEmployeeDto);
-    return response.status(HttpStatus.OK).json(employee);
+    return response.status(HttpStatus.OK).json({ employee });
   }
-
   @Get()
-  findAll() {
-    return this.employeesService.findAllEmployees();
+  @HttpCode(200)
+  public async findAll(): Promise<Employees> {
+    return await this.employeesService.findAllEmployees();
   }
-
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.employeesService.findOneEmployee(+id);
   }
 
