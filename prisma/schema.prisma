@@ -23,6 +23,7 @@ model Users {
   email       String @unique
   password    String
   role        Role @default(ADMIN)
+  refreshToken String
   customer    Customers?  @relation(fields: [customerId], references: [id])
   customerId  Int? @unique
   employee    Employees?  @relation(fields: [employeeId], references: [id])
